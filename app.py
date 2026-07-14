@@ -19,7 +19,8 @@ st.set_page_config(
 st.title("🔧 Sistema de Gestión de Herramientas")
 st.subheader("Universidad Politécnica de Querétaro")
 
-ruta_excel = "Excel/inventario.xlsx.xlsx"
+# Ruta correcta del inventario
+ruta_excel = "excel/inventario.xlsx"
 
 # ==========================================
 # MENÚ LATERAL
@@ -52,17 +53,38 @@ try:
         header=None
     )
 
-    # Limpieza del inventario
-    inventario = inventario.replace("None", "")
-    inventario = inventario.fillna("")
-    inventario = inventario.dropna(axis=1, how="all")
-    inventario = inventario.dropna(how="all")
-    inventario = inventario.reset_index(drop=True)
+    # ==========================================
+    # LIMPIEZA DEL INVENTARIO
+    # ==========================================
 
-    # Calcular piezas disponibles
+    inventario = inventario.replace(
+        ["None", "nan", "NaN"],
+        pd.NA
+    )
+
+    inventario = inventario.dropna(
+        axis=1,
+        how="all"
+    )
+
+    inventario = inventario.dropna(
+        how="all"
+    )
+
+    inventario = inventario.fillna("")
+
+    inventario = inventario.reset_index(
+        drop=True
+    )
+
+    # ==========================================
+    # MÉTRICAS
+    # ==========================================
+
     cantidad_total = 0
 
     for columna in inventario.columns:
+
         suma = pd.to_numeric(
             inventario[columna],
             errors="coerce"
@@ -111,7 +133,9 @@ try:
 
     if menu == "📦 Inventario":
 
-        st.header(f"📦 Inventario - {almacen}")
+        st.header(
+            f"📦 Inventario - {almacen}"
+        )
 
         busqueda = st.text_input(
             "🔍 Buscar herramienta"
@@ -120,13 +144,15 @@ try:
         inventario_filtrado = inventario
 
         if busqueda:
+
             inventario_filtrado = inventario[
                 inventario.astype(str)
                 .apply(
                     lambda fila:
                     fila.str.contains(
                         busqueda,
-                        case=False
+                        case=False,
+                        na=False
                     ).any(),
                     axis=1
                 )
@@ -144,25 +170,43 @@ try:
 
     elif menu == "📝 Solicitar herramienta":
 
-        st.header("📝 Solicitud de préstamo")
+        st.header(
+            "📝 Solicitud de préstamo"
+        )
 
         col1, col2 = st.columns(2)
 
         with col1:
-            matricula = st.text_input("🎓 Matrícula")
-            nombre = st.text_input("👤 Nombre completo")
-            carrera = st.text_input("🏫 Carrera")
+            matricula = st.text_input(
+                "🎓 Matrícula"
+            )
+
+            nombre = st.text_input(
+                "👤 Nombre completo"
+            )
+
+            carrera = st.text_input(
+                "🏫 Carrera"
+            )
 
         with col2:
-            profesor = st.text_input("👨‍🏫 Profesor responsable")
-            materia = st.text_input("📚 Materia")
+            profesor = st.text_input(
+                "👨‍🏫 Profesor responsable"
+            )
+
+            materia = st.text_input(
+                "📚 Materia"
+            )
+
             fecha_devolucion = st.date_input(
                 "📅 Fecha de devolución"
             )
 
         herramienta = st.selectbox(
             "🔧 Herramienta solicitada",
-            inventario.iloc[:,0].astype(str).tolist()
+            inventario.iloc[:, 0]
+            .astype(str)
+            .tolist()
         )
 
         cantidad = st.number_input(
@@ -175,16 +219,22 @@ try:
             "📝 Observaciones"
         )
 
-        if st.button("📋 Enviar solicitud"):
-            st.success("Solicitud enviada correctamente.")
+        if st.button(
+            "📋 Enviar solicitud"
+        ):
+            st.success(
+                "Solicitud enviada correctamente."
+            )
 
     # ==========================================
-    # PRÉSTAMOS
+    # PRÉSTAMOS ACTIVOS
     # ==========================================
 
     elif menu == "📋 Préstamos activos":
 
-        st.header("📋 Préstamos activos")
+        st.header(
+            "📋 Préstamos activos"
+        )
 
         st.info(
             "Aquí aparecerán las herramientas actualmente prestadas."
@@ -196,7 +246,9 @@ try:
 
     elif menu == "🔄 Devoluciones":
 
-        st.header("🔄 Registro de devoluciones")
+        st.header(
+            "🔄 Registro de devoluciones"
+        )
 
         st.info(
             "Aquí se registrarán las devoluciones."
@@ -208,7 +260,9 @@ try:
 
     elif menu == "🛠 Herramientas dañadas":
 
-        st.header("🛠 Herramientas dañadas")
+        st.header(
+            "🛠 Herramientas dañadas"
+        )
 
         st.info(
             "Aquí se registrarán los daños y mantenimientos."
@@ -220,7 +274,9 @@ try:
 
     elif menu == "📈 Reportes":
 
-        st.header("📈 Reportes y estadísticas")
+        st.header(
+            "📈 Reportes y estadísticas"
+        )
 
         st.metric(
             "Herramientas registradas",
@@ -233,6 +289,7 @@ try:
         )
 
 except Exception as e:
+
     st.error(
         f"Error al cargar el archivo: {e}"
     )
