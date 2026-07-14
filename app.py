@@ -19,9 +19,7 @@ st.set_page_config(
 st.title("🔧 Sistema de Gestión de Herramientas")
 st.subheader("Universidad Politécnica de Querétaro")
 
-# IMPORTANTE:
-# La carpeta es "excel" en minúsculas
-ruta_excel = "excel/inventario.xlsx.xlsx"
+ruta_excel = "Excel/inventario.xlsx.xlsx"
 
 # ==========================================
 # MENÚ LATERAL
@@ -54,23 +52,14 @@ try:
         header=None
     )
 
-    # ==========================================
-    # LIMPIEZA DEL INVENTARIO
-    # ==========================================
-
-    inventario = inventario.replace("None", pd.NA)
+    # Limpieza del inventario
+    inventario = inventario.replace("None", "")
+    inventario = inventario.fillna("")
     inventario = inventario.dropna(axis=1, how="all")
     inventario = inventario.dropna(how="all")
-    inventario = inventario.fillna("")
     inventario = inventario.reset_index(drop=True)
 
-    # Renumerar columnas
-    inventario.columns = range(len(inventario.columns))
-
-    # ==========================================
-    # CALCULAR PIEZAS DISPONIBLES
-    # ==========================================
-
+    # Calcular piezas disponibles
     cantidad_total = 0
 
     for columna in inventario.columns:
@@ -137,8 +126,7 @@ try:
                     lambda fila:
                     fila.str.contains(
                         busqueda,
-                        case=False,
-                        na=False
+                        case=False
                     ).any(),
                     axis=1
                 )
@@ -174,7 +162,7 @@ try:
 
         herramienta = st.selectbox(
             "🔧 Herramienta solicitada",
-            inventario.iloc[:, 0].astype(str).tolist()
+            inventario.iloc[:,0].astype(str).tolist()
         )
 
         cantidad = st.number_input(
@@ -188,9 +176,7 @@ try:
         )
 
         if st.button("📋 Enviar solicitud"):
-            st.success(
-                "Solicitud enviada correctamente."
-            )
+            st.success("Solicitud enviada correctamente.")
 
     # ==========================================
     # PRÉSTAMOS
