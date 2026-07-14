@@ -20,7 +20,7 @@ st.title("🔧 Sistema de Gestión de Herramientas")
 st.subheader("Universidad Politécnica de Querétaro")
 
 # El archivo inventario.xlsx.xlsx debe estar junto a app.py
-ruta_excel = "inventario.xlsx.xlsx"
+ruta_excel = "excel/inventario.xlsx"
 
 # ==========================================
 # MENÚ LATERAL
