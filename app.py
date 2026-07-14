@@ -19,8 +19,9 @@ st.set_page_config(
 st.title("🔧 Sistema de Gestión de Herramientas")
 st.subheader("Universidad Politécnica de Querétaro")
 
-# RUTA CORREGIDA
-ruta_excel = "excel/inventario.xlsx"
+# IMPORTANTE:
+# La carpeta es "excel" en minúsculas
+ruta_excel = "excel/inventario.xlsx.xlsx"
 
 # ==========================================
 # MENÚ LATERAL
@@ -53,14 +54,23 @@ try:
         header=None
     )
 
-    # Limpieza del inventario
-    inventario = inventario.replace("None", "")
-    inventario = inventario.fillna("")
+    # ==========================================
+    # LIMPIEZA DEL INVENTARIO
+    # ==========================================
+
+    inventario = inventario.replace("None", pd.NA)
     inventario = inventario.dropna(axis=1, how="all")
     inventario = inventario.dropna(how="all")
+    inventario = inventario.fillna("")
     inventario = inventario.reset_index(drop=True)
 
-    # Calcular piezas disponibles
+    # Renumerar columnas
+    inventario.columns = range(len(inventario.columns))
+
+    # ==========================================
+    # CALCULAR PIEZAS DISPONIBLES
+    # ==========================================
+
     cantidad_total = 0
 
     for columna in inventario.columns:
@@ -74,20 +84,35 @@ try:
 
     total_herramientas = len(inventario)
 
-    # Dashboard
+    # ==========================================
+    # DASHBOARD
+    # ==========================================
+
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        st.metric("📦 Herramientas", total_herramientas)
+        st.metric(
+            "📦 Herramientas",
+            total_herramientas
+        )
 
     with col2:
-        st.metric("🔢 Piezas disponibles", int(cantidad_total))
+        st.metric(
+            "🔢 Piezas disponibles",
+            int(cantidad_total)
+        )
 
     with col3:
-        st.metric("🏢 Almacén", almacen)
+        st.metric(
+            "🏢 Almacén",
+            almacen
+        )
 
     with col4:
-        st.metric("📑 Almacenes", len(archivo.sheet_names))
+        st.metric(
+            "📑 Almacenes",
+            len(archivo.sheet_names)
+        )
 
     st.divider()
 
@@ -112,7 +137,8 @@ try:
                     lambda fila:
                     fila.str.contains(
                         busqueda,
-                        case=False
+                        case=False,
+                        na=False
                     ).any(),
                     axis=1
                 )
@@ -122,6 +148,102 @@ try:
             inventario_filtrado,
             use_container_width=True,
             hide_index=True
+        )
+
+    # ==========================================
+    # SOLICITUD DE HERRAMIENTAS
+    # ==========================================
+
+    elif menu == "📝 Solicitar herramienta":
+
+        st.header("📝 Solicitud de préstamo")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            matricula = st.text_input("🎓 Matrícula")
+            nombre = st.text_input("👤 Nombre completo")
+            carrera = st.text_input("🏫 Carrera")
+
+        with col2:
+            profesor = st.text_input("👨‍🏫 Profesor responsable")
+            materia = st.text_input("📚 Materia")
+            fecha_devolucion = st.date_input(
+                "📅 Fecha de devolución"
+            )
+
+        herramienta = st.selectbox(
+            "🔧 Herramienta solicitada",
+            inventario.iloc[:, 0].astype(str).tolist()
+        )
+
+        cantidad = st.number_input(
+            "🔢 Cantidad",
+            min_value=1,
+            value=1
+        )
+
+        observaciones = st.text_area(
+            "📝 Observaciones"
+        )
+
+        if st.button("📋 Enviar solicitud"):
+            st.success(
+                "Solicitud enviada correctamente."
+            )
+
+    # ==========================================
+    # PRÉSTAMOS
+    # ==========================================
+
+    elif menu == "📋 Préstamos activos":
+
+        st.header("📋 Préstamos activos")
+
+        st.info(
+            "Aquí aparecerán las herramientas actualmente prestadas."
+        )
+
+    # ==========================================
+    # DEVOLUCIONES
+    # ==========================================
+
+    elif menu == "🔄 Devoluciones":
+
+        st.header("🔄 Registro de devoluciones")
+
+        st.info(
+            "Aquí se registrarán las devoluciones."
+        )
+
+    # ==========================================
+    # HERRAMIENTAS DAÑADAS
+    # ==========================================
+
+    elif menu == "🛠 Herramientas dañadas":
+
+        st.header("🛠 Herramientas dañadas")
+
+        st.info(
+            "Aquí se registrarán los daños y mantenimientos."
+        )
+
+    # ==========================================
+    # REPORTES
+    # ==========================================
+
+    elif menu == "📈 Reportes":
+
+        st.header("📈 Reportes y estadísticas")
+
+        st.metric(
+            "Herramientas registradas",
+            total_herramientas
+        )
+
+        st.metric(
+            "Piezas disponibles",
+            int(cantidad_total)
         )
 
 except Exception as e:
